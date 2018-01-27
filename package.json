@@ -1,0 +1,27 @@
+{
+  "name": "automated-scout18",
+  "version": "0.1.0",
+  "description": "ata scouting system",
+  "main": "app.js",
+  "author": "Joel Gallant <joel@joelgallant.me>",
+  "scripts": {
+    "start": "node ./app.js",
+    "dev": "nodemon ./app.js",
+    "lint": "eslint --ext .js ./",
+    "fix": "eslint --fix --ext .js ./"
+  },
+  "dependencies": {
+    "koa": "^2.4.1",
+    "koa-router": "^7.3.0",
+    "lodash": "^4.17.4",
+    "nodemon": "^1.14.11",
+    "pug": "^2.0.0-rc.4",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5"
+  },
+  "devDependencies": {
+    "eslint": "^4.11.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0"
+  }
+}
