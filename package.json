@@ -2,11 +2,11 @@
   "name": "automated-scout18",
   "version": "0.1.0",
   "description": "ata scouting system",
-  "main": "app.js",
+  "main": "src/app.js",
   "author": "Joel Gallant <joel@joelgallant.me>",
   "scripts": {
-    "start": "node ./app.js",
-    "dev": "nodemon ./app.js",
+    "start": "node ./src/app.js",
+    "dev": "nodemon ./src/app.js",
     "lint": "eslint --ext .js ./",
     "fix": "eslint --fix --ext .js ./"
   },
