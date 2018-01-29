@@ -10,19 +10,19 @@ const {
 
 // API
 router.get('/team/:number', async (ctx) => {
-  ctx.body = await Team.get(ctx.params.number);
+  ctx.body = await Team.get(ctx.params.number, ctx.query.refresh);
 });
 
 router.get('/event/:key', async (ctx) => {
-  ctx.body = await Event.get(ctx.params.key);
+  ctx.body = await Event.get(ctx.params.key, ctx.query.refresh);
 });
 
 router.get('/team/:number/event/:key', async (ctx) => {
-  ctx.body = await TeamEvent.get(ctx.params.number, ctx.params.key);
+  ctx.body = await TeamEvent.get(ctx.params.number, ctx.params.key, ctx.query.refresh);
 });
 
 router.get('/team/:number/:year', async (ctx) => {
-  ctx.body = await TeamYear.get(ctx.params.number, ctx.params.year);
+  ctx.body = await TeamYear.get(ctx.params.number, ctx.params.year, ctx.query.refresh);
 });
 
 // Views
