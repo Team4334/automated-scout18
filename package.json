@@ -16,6 +16,7 @@
     "lodash": "^4.17.4",
     "node-cache": "^4.1.1",
     "nodemon": "^1.14.11",
+    "numeric": "^1.2.6",
     "pug": "^2.0.0-rc.4",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5"

@@ -5,6 +5,10 @@ const pug = require('pug');
 const router = new Router();
 
 const {
+  Team,
+  Matches,
+  Event,
+  TeamEvent,
   TeamYear,
 } = require('./models');
 
@@ -15,6 +19,10 @@ router.get('/team/:number', async (ctx) => {
 
 router.get('/event/:key', async (ctx) => {
   ctx.body = await Event.get(ctx.params.key, ctx.query.refresh);
+});
+
+router.get('/event/:key/matches', async (ctx) => {
+  ctx.body = await Matches.get(ctx.params.key, ctx.query.refresh);
 });
 
 router.get('/team/:number/event/:key', async (ctx) => {
@@ -33,11 +41,13 @@ const addView = (path, view, getModel) => {
 };
 
 addView('/', 'index', async (ctx) => {
-  const obj = await TeamYear.get(4334, 2016);
-  return { data: obj };
+  const data = await TeamYear.get(254, 2018);
+  return { data };
 });
 
 new Koa()
   .use(router.routes())
   .use(router.allowedMethods())
   .listen(process.env.PORT || 4334);
+
+console.log(`Server on localhost:${process.env.PORT || 4334}`);

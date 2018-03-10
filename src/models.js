@@ -1,6 +1,36 @@
 const tba = require('./tba');
 const NodeCache = require('node-cache');
+const { calcOPR, calcDPR, calcCCWM } = require('./opr');
 const cache = new NodeCache({ stdTTL: 125 });
+
+const componentOPRs = [
+  'autoOwnershipPoints',
+  'autoPoints',
+  'autoRunPoints',
+  'autoScaleOwnershipSec',
+  'autoSwitchOwnershipSec',
+  'endgamePoints',
+  'foulCount',
+  'foulPoints',
+  'rp',
+  'techFoulCount',
+  'teleopOwnershipPoints',
+  'teleopPoints',
+  'teleopScaleBoostSec',
+  'teleopScaleForceSec',
+  'teleopScaleOwnershipSec',
+  'teleopSwitchBoostSec',
+  'teleopSwitchForceSec',
+  'teleopSwitchOwnershipSec',
+  'totalPoints',
+  'vaultBoostPlayed',
+  'vaultBoostTotal',
+  'vaultForcePlayed',
+  'vaultForceTotal',
+  'vaultLevitatePlayed',
+  'vaultLevitateTotal',
+  'vaultPoints',
+];
 
 const wrapAsCacheable = (fn, toKey) => (...args) => {
   const refresh = args[args.length - 1] === true || args[args.length - 1] === 'true';
@@ -33,18 +63,119 @@ class Team {
   }
 }
 
+class Match {
+  constructor(match) {
+    if (!match.score_breakdown) {
+      match.score_breakdown = {};
+    }
+
+    this.key = match.key;
+    this.number = match.match_number;
+    this.hasOccured = !!match.score_breakdown.blue;
+    this.teams = {
+      red: match.alliances.red.team_keys,
+      blue: match.alliances.blue.team_keys,
+    };
+    this.result = {
+      winner: (match.alliances.blue.score > match.alliances.red.score) ? 'blue' : ((match.alliances.red.score > match.alliances.blue.score) ? 'red' : null),
+      blue: {
+        score: match.alliances.blue.score,
+        breakdown: match.score_breakdown.blue,
+      },
+      red: {
+        score: match.alliances.red.score,
+        breakdown: match.score_breakdown.red,
+      },
+    };
+  }
+}
+
+class Matches {
+  static async fetch(eventKey) {
+    if (!eventKey) throw new Error('no key/code');
+
+    return new Matches(await tba.get(`/event/${eventKey}/matches`));
+  }
+
+  constructor(list) {
+    this.list = list.filter(match => match.comp_level === 'qm').map(match => new Match(match));
+  }
+}
+
+class Stats {
+  constructor(matches) {
+    matches = matches.filter(match => match.hasOccured);
+    const teams = matches
+      .reduce((acc, match) => {
+        // filter for teams who have played matches
+        return acc.concat(match.teams.red).concat(match.teams.blue);
+      }, [])
+      .filter((item, pos, arr) => {
+        // fitler unique
+        return arr.indexOf(item) == pos;
+      });
+
+    this.opr = {};
+    this.dpr = {};
+    this.ccwm = {};
+
+    componentOPRs.forEach(component => {
+      this.opr[component] = calcOPR(teams, matches, (x) => x[component]);
+      this.dpr[component] = calcDPR(teams, matches, (x) => x[component]);
+      this.ccwm[component] = calcCCWM(teams, matches, (x) => x[component]);
+    });
+
+    const accuracyOfMethod = (accessor) => {
+      return 100 * matches.filter((match) => {
+        const red = accessor(match.teams.red[0]) + accessor(match.teams.red[1]) + accessor(match.teams.red[2]);
+        const blue = accessor(match.teams.blue[0]) + accessor(match.teams.blue[1]) + accessor(match.teams.blue[2]);
+
+        if (red > blue) {
+          return match.result.winner === 'red';
+        } else {
+          return match.result.winner === 'blue';
+        }
+      }).length / matches.length;
+    };
+
+    const accuracies = [];
+    const types = { opr: this.opr, dpr: this.dpr, ccwm: this.ccwm };
+    Object.keys(types).forEach((category) => {
+      for (let component in types[category]) {
+        // of course rp means you won
+        if (component === 'rp') {
+          continue;
+        }
+
+        accuracies.push({
+          type: `${category}-${component}`,
+          accuracy: accuracyOfMethod((team) => types[category][component][team]),
+        });
+      }
+    });
+
+    accuracies.sort((a, b) => b.accuracy - a.accuracy);
+    this.bests = accuracies;
+  }
+}
+
 class Event {
   static async fetch(key) {
     if (!key) throw new Error('no event key');
 
     return new Event({
       info: await tba.get(`/event/${key}`),
+      teams: await tba.get(`/event/${key}/teams`),
+      matches: await Matches.get(key),
     });
   }
 
   constructor(obj) {
     this.name = obj.info.name;
     this.key = obj.info.key;
+    this.teams = obj.teams.map(team => team.key);
+    this.matches = obj.matches;
+    this.stats = new Stats(this.matches.list);
   }
 }
 
@@ -56,6 +187,17 @@ class TeamEvent {
   constructor(team, event) {
     this.team = team;
     this.event = event;
+    this.matches = event.matches.list.filter((match) => {
+      return match.teams.red.indexOf(team.key) !== -1 || match.teams.blue.indexOf(team.key) !== -1;
+    }).map(match => match.key);
+    this.stats = {};
+    Object.keys(event.stats).forEach(type => {
+      if (type === 'best') { return; }
+      this.stats[type] = { };
+      Object.keys(event.stats[type]).forEach(key => {
+        this.stats[type][key] = event.stats[type][key][team.key];
+      });
+    });
   }
 }
 
@@ -75,12 +217,15 @@ class TeamYear {
 }
 
 Team.get = wrapAsCacheable(Team.fetch, (number) => `Team:${number}`);
+Matches.get = wrapAsCacheable(Matches.fetch, (eventKey) => `Matches:${eventKey}`);
 Event.get = wrapAsCacheable(Event.fetch, (key) => `Event:${key}`);
 TeamEvent.get = wrapAsCacheable(TeamEvent.fetch, (key) => `TeamEvent:${key}`);
 TeamYear.get = wrapAsCacheable(TeamYear.fetch, (key) => `TeamYear:${key}`);
 
 module.exports = {
   Team,
+  Matches,
+  Event,
   TeamEvent,
   TeamYear,
 };
