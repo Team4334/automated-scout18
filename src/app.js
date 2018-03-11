@@ -1,6 +1,7 @@
 const Koa = require('koa');
 const Router = require('koa-router');
 const pug = require('pug');
+const tba = require('./tba');
 
 const router = new Router();
 
@@ -15,10 +16,6 @@ const {
 // API
 router.get('/team/:number', async (ctx) => {
   ctx.body = await Team.get(ctx.params.number, ctx.query.refresh);
-});
-
-router.get('/event/:key', async (ctx) => {
-  ctx.body = await Event.get(ctx.params.key, ctx.query.refresh);
 });
 
 router.get('/event/:key/matches', async (ctx) => {
@@ -36,13 +33,49 @@ router.get('/team/:number/:year', async (ctx) => {
 // Views
 const addView = (path, view, getModel) => {
   router.get(path, async (ctx) => {
-    ctx.body = pug.renderFile(`./views/${view}.pug`, await getModel(ctx));
+    const model = await getModel(ctx);
+    if (ctx.query.json == 'true') {
+      ctx.body = model; return;
+    } else {
+      ctx.body = pug.renderFile(`./views/${view}.pug`, model);
+    }
   });
 };
 
 addView('/', 'index', async (ctx) => {
-  const data = await TeamYear.get(254, 2018);
-  return { data };
+  const events = await tba.get('/events/2018/simple');
+
+  events.sort(function(a, b) {
+    let s = Date.parse(a.start_date) - Date.parse(b.start_date);
+    if (s == 0) {
+      s = a.key.localeCompare(b.key);
+    }
+    return s;
+  });
+
+
+  const event_info = { now: [], future: [], past: [] };
+
+  events.forEach((event) => {
+    const from = Date.parse(event.start_date);
+    const to = new Date(Date.parse(event.end_date));
+    to.setDate(to.getDate() + 1);
+    if (Date.now() > from) {
+      if (Date.now() <= to) {
+        event_info.now.push(event);
+      } else {
+        event_info.past.push(event);
+      }
+    } else {
+      event_info.future.push(event);
+    }
+  });
+
+  return { event_info };
+});
+
+addView('/event/:key', 'event', async (ctx) => {
+  return { event: await Event.get(ctx.params.key, ctx.query.refresh) };
 });
 
 new Koa()

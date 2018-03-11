@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  .container
+    h1 #{event.name} #{event.year}
+
+    .col-md-4
+      a(href="https://www.thebluealliance.com/event/" + event.key style="padding-right:5px")
+        img(src="https://www.thebluealliance.com/images/logo_square_512.png" height="25px" width="25px" style="border-radius: 25px;")
+      br
+      br
+
+      p Prediction (#{event.stats.bests[0].type}) has been #{event.stats.bests[0].accuracy.toFixed(2)}% accurate. (see scores in brackets)
+
+      a(href="/event/" + event.key + "/compare" style="margin: 15px 0").btn.btn-primary.btn-block Compare All Teams
+
+      ul.list-group
+        each team in event.teams.map((t) => t.substr(3)).sort((a, b) => a - b)
+          .col
+            a(href="/team/" + team + "/event/" + event.key)
+              li.list-group-item Team #{team}
+
+    .col-md-8
+      include match
+      each match in event.matches
+        .col-sm-6
+          +score(match)

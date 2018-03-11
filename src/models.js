@@ -77,7 +77,7 @@ class Match {
       blue: match.alliances.blue.team_keys,
     };
     this.result = {
-      winner: (match.alliances.blue.score > match.alliances.red.score) ? 'blue' : ((match.alliances.red.score > match.alliances.blue.score) ? 'red' : null),
+      winner: (match.alliances.blue.score > match.alliances.red.score) ? 'blue' : ((match.alliances.red.score > match.alliances.blue.score) ? 'red' : (match.alliances.red.score === match.alliances.blue.score ? 'tie' : null)),
       blue: {
         score: match.alliances.blue.score,
         breakdown: match.score_breakdown.blue,
@@ -98,7 +98,7 @@ class Matches {
   }
 
   constructor(list) {
-    this.list = list.filter(match => match.comp_level === 'qm').map(match => new Match(match));
+    this.list = list.filter(match => match.comp_level === 'qm').map(match => new Match(match)).sort((a, b) => a.number - b.number);
   }
 }
 
@@ -121,7 +121,7 @@ class Stats {
 
     componentOPRs.forEach(component => {
       this.opr[component] = calcOPR(teams, matches, (x) => x[component]);
-      this.dpr[component] = calcDPR(teams, matches, (x) => x[component]);
+      this.dpr[component] = calcDPR(teams, matches, (x) => -x[component]); // inversed for prediction
       this.ccwm[component] = calcCCWM(teams, matches, (x) => x[component]);
     });
 
@@ -173,9 +173,47 @@ class Event {
   constructor(obj) {
     this.name = obj.info.name;
     this.key = obj.info.key;
+    this.year = obj.info.year;
     this.teams = obj.teams.map(team => team.key);
-    this.matches = obj.matches;
-    this.stats = new Stats(this.matches.list);
+    this.stats = new Stats(obj.matches.list);
+
+    const [ bestType, bestComponent ] = this.stats.bests[0].type.split('-');
+
+    this.matches = obj.matches.list.map((match) => {
+      const red = match.teams.red.reduce((acc, team) => acc + this.stats[bestType][bestComponent][team], 0);
+      const blue = match.teams.blue.reduce((acc, team) => acc + this.stats[bestType][bestComponent][team], 0);
+      return {
+        ...match,
+        prediction: {
+          type: bestType,
+          component: bestComponent,
+          winner: red > blue ? 'red' : 'blue',
+          red, blue,
+        },
+      };
+    });
+
+    this.prediction = { teams: {} };
+    this.teams.forEach(team => this.prediction.teams[team] = {
+      wins: 0,
+    });
+
+    this.matches.forEach((match) => {
+      if (match.hasOccured) {
+        if (match.result.winner === 'tie') {
+          match.teams.red.forEach(team => this.prediction.teams[team].wins += 1);
+          match.teams.blue.forEach(team => this.prediction.teams[team].wins += 1);
+        } else {
+          match.teams[match.result.winner].forEach(team => this.prediction.teams[team].wins += 2);
+        }
+      } else {
+        match.teams[match.prediction.winner].forEach(team => this.prediction.teams[team].wins += 2);
+      }
+    });
+
+    this.prediction.ranking = Object.keys(this.prediction.teams).sort((a, b) => {
+      return this.prediction.teams[b].wins - this.prediction.teams[a].wins;
+    });
   }
 }
 
@@ -187,12 +225,12 @@ class TeamEvent {
   constructor(team, event) {
     this.team = team;
     this.event = event;
-    this.matches = event.matches.list.filter((match) => {
+    this.matches = event.matches.filter((match) => {
       return match.teams.red.indexOf(team.key) !== -1 || match.teams.blue.indexOf(team.key) !== -1;
     }).map(match => match.key);
     this.stats = {};
     Object.keys(event.stats).forEach(type => {
-      if (type === 'best') { return; }
+      if (type === 'bests') { return; }
       this.stats[type] = { };
       Object.keys(event.stats[type]).forEach(key => {
         this.stats[type][key] = event.stats[type][key][team.key];
