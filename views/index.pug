@@ -2,19 +2,16 @@ extends layout
 
 block content
   h2= 'Happening now'
-  ul
-  each event in event_info.now
-    li
-    a(href="event/" + event.key) #{event.name}
+  .row
+    each event in event_info.now
+      .col-xs-12.col-sm-3.col-md-2(style="margin-bottom:15px"): a(href="event/" + event.key) #{event.name}
 
   h2= 'Future events'
   ul
   each event in event_info.future
-    li
-    a(href="event/" + event.key) #{event.start_date} - #{event.name}
+    li: a(href="event/" + event.key) #{event.start_date} - #{event.name}
 
   h2= 'Past events'
   ul
   each event in event_info.past
-    li
-    a(href="event/" + event.key) #{event.name}
+    li: a(href="event/" + event.key) #{event.name}

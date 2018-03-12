@@ -76,8 +76,10 @@ class Match {
       red: match.alliances.red.team_keys,
       blue: match.alliances.blue.team_keys,
     };
+    const winner = (match.alliances.blue.score > match.alliances.red.score) ? 'blue' : ((match.alliances.red.score > match.alliances.blue.score) ? 'red' : (match.alliances.red.score === match.alliances.blue.score ? 'tie' : null));
     this.result = {
-      winner: (match.alliances.blue.score > match.alliances.red.score) ? 'blue' : ((match.alliances.red.score > match.alliances.blue.score) ? 'red' : (match.alliances.red.score === match.alliances.blue.score ? 'tie' : null)),
+      winner,
+      loser: winner === 'red' ? 'blue' : (winner === 'blue' ? 'red' : null),
       blue: {
         score: match.alliances.blue.score,
         breakdown: match.score_breakdown.blue,
@@ -132,8 +134,10 @@ class Stats {
 
         if (red > blue) {
           return match.result.winner === 'red';
-        } else {
+        } else if (blue > red) {
           return match.result.winner === 'blue';
+        } else {
+          return true;
         }
       }).length / matches.length;
     };
@@ -196,24 +200,32 @@ class Event {
     this.prediction = { teams: {} };
     this.teams.forEach(team => this.prediction.teams[team] = {
       wins: 0,
+      ties: 0,
+      loses: 0,
     });
 
     this.matches.forEach((match) => {
       if (match.hasOccured) {
         if (match.result.winner === 'tie') {
-          match.teams.red.forEach(team => this.prediction.teams[team].wins += 1);
-          match.teams.blue.forEach(team => this.prediction.teams[team].wins += 1);
+          match.teams.red.forEach(team => this.prediction.teams[team].ties += 1);
+          match.teams.blue.forEach(team => this.prediction.teams[team].ties += 1);
         } else {
-          match.teams[match.result.winner].forEach(team => this.prediction.teams[team].wins += 2);
+          match.teams[match.result.winner].forEach(team => this.prediction.teams[team].wins += 1);
+          match.teams[match.result.loser].forEach(team => this.prediction.teams[team].loses += 1);
         }
       } else {
-        match.teams[match.prediction.winner].forEach(team => this.prediction.teams[team].wins += 2);
+        match.teams[match.prediction.winner].forEach(team => this.prediction.teams[team].wins += 1);
+        match.teams[match.prediction.loser].forEach(team => this.prediction.teams[team].loses += 1);
       }
     });
 
-    this.prediction.ranking = Object.keys(this.prediction.teams).sort((a, b) => {
-      return this.prediction.teams[b].wins - this.prediction.teams[a].wins;
-    });
+    this.prediction.ranking = {
+      record: Object.keys(this.prediction.teams).sort((a, b) => {
+        const predA = this.prediction.teams[a];
+        const predB = this.prediction.teams[b];
+        return (predB.wins * 2 + predB.ties) - (predA.wins * 2 + predA.ties);
+      }),
+    };
   }
 }
 

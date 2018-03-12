@@ -1,20 +1,19 @@
 style
-    | .alli-blue { background-color: #d6f5f4; }
-    | .alli-red { background-color: #ffd6d6; }
+  | .alli-blue { background-color: #d6f5f4; } .alli-red { background-color: #ffd6d6; }
 
 mixin alliance(alli, match)
-    .well.well-sm(class="alli-" + alli, style=(match.result.winner === alli) ? "font-weight: bold" : "")
-        | #{match.teams[alli][0].substring(3)} | #{match.teams[alli][1].substring(3)} | #{match.teams[alli][2].substring(3)}
-        if match.hasOccured
-            div(style="float:right;margin-left:3px;font-family:monospace;") #{match.result[alli].score}
-        if match.prediction.winner === alli
-            div(style="float:right;font-weight:bold;font-family:monospace;") (#{match.prediction[alli].toFixed(0)})
-        else
-            div(style="float:right;font-family:monospace;") (#{match.prediction[alli].toFixed(0)})
+  .well.well-sm(class="alli-" + alli, style=((match.result.winner === alli) ? "font-weight: bold;margin-bottom:5px;" : "margin-bottom:5px;"))
+    | #{match.teams[alli][0].substring(3)} | #{match.teams[alli][1].substring(3)} | #{match.teams[alli][2].substring(3)}
+    if match.hasOccured
+      div(style="float:right;margin-left:3px;font-family:monospace;") #{match.result[alli].score}
+    if match.prediction.winner === alli
+      div(style="float:right;font-weight:bold;font-family:monospace;") (#{match.prediction[alli].toFixed(0)})
+    else
+      div(style="float:right;font-family:monospace;") (#{match.prediction[alli].toFixed(0)})
 
 mixin score(match)
-    .well.well-sm(style="background:white")
-        p(style="padding-left:5px")
-            a(href="https://www.thebluealliance.com/match/" + match.key) Match #{match.number}
-        +alliance("red", match)
-        +alliance("blue", match)
+  .well.well-sm(style="background:white")
+    p(style="padding-left:5px")
+      a(href="https://www.thebluealliance.com/match/" + match.key) Match #{match.number}
+    +alliance("red", match)
+    +alliance("blue", match)

@@ -1,27 +1,27 @@
 extends layout
 
 block content
-  .container
-    h1 #{event.name} #{event.year}
+  h1 #{event.name} #{event.year}
+    a(href="https://www.thebluealliance.com/event/" + event.key style="padding-left:15px")
+      img(src="https://www.thebluealliance.com/images/logo_square_512.png" height="25px" width="25px" style="border-radius: 25px;")
 
-    .col-md-4
-      a(href="https://www.thebluealliance.com/event/" + event.key style="padding-right:5px")
-        img(src="https://www.thebluealliance.com/images/logo_square_512.png" height="25px" width="25px" style="border-radius: 25px;")
-      br
-      br
+  - const predictor = event.stats.bests[0].type.split('-');
+  p Best predictor of match outcome: #{predictor[0].toUpperCase()} (#{predictor[1]})
+  p Accuracy: #{event.stats.bests[0].accuracy.toFixed(2)}% (scores in brackets)
 
-      p Prediction (#{event.stats.bests[0].type}) has been #{event.stats.bests[0].accuracy.toFixed(2)}% accurate. (see scores in brackets)
+  .row
+    each team in event.teams.map((t) => t.substr(3)).sort((a, b) => a - b)
+      .col-xs-4.col-sm-3.col-md-2
+        a(href="/team/" + team + "/event/" + event.key)
+          p #{team}
 
-      a(href="/event/" + event.key + "/compare" style="margin: 15px 0").btn.btn-primary.btn-block Compare All Teams
+  p Predicted record
+  .row
+    each team in event.prediction.ranking.record
+      .col-xs-4.col-sm-2
+        p #{team.substr(3)} (#{event.prediction.teams[team].wins}-#{event.prediction.teams[team].ties}-#{event.prediction.teams[team].loses})
 
-      ul.list-group
-        each team in event.teams.map((t) => t.substr(3)).sort((a, b) => a - b)
-          .col
-            a(href="/team/" + team + "/event/" + event.key)
-              li.list-group-item Team #{team}
-
-    .col-md-8
-      include match
-      each match in event.matches
-        .col-sm-6
-          +score(match)
+  include match
+  each match in event.matches
+    .col-xs-12.col-sm-6.col-md-4
+      +score(match)

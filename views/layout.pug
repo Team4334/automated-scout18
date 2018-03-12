@@ -33,6 +33,7 @@ html
           li: a(href='/team/'+team.number) Team #{team.number} #{team.name}
       ul.nav.navbar-nav.navbar-right
         li: a(href='?refresh=true') Hard Refresh
-        li: a(href='?json=true') Raw JSON Data
-  div.container
+        li: a(href='?json=true') Raw Data
+        li: a()
+  div.container-fluid
     block content
