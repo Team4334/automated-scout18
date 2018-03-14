@@ -254,10 +254,11 @@ class TeamEvent {
       return match.teams.red.indexOf(team.key) !== -1 || match.teams.blue.indexOf(team.key) !== -1;
     }).map(match => match.key);
     this.stats = {};
+
     Object.keys(event.stats).forEach(type => {
       if (type === 'bests') { return; }
       if (type === 'ranks') { return; }
-      this.stats[type] = { };
+      this.stats[type] = {};
       Object.keys(event.stats[type]).forEach(key => {
         this.stats[type][key] = {
           value: event.stats[type][key][team.key],

@@ -22,10 +22,6 @@ router.get('/event/:key/matches', async (ctx) => {
   ctx.body = await Matches.get(ctx.params.key, ctx.query.refresh);
 });
 
-router.get('/team/:number/event/:key', async (ctx) => {
-  ctx.body = await TeamEvent.get(ctx.params.number, ctx.params.key, ctx.query.refresh);
-});
-
 router.get('/team/:number/:year', async (ctx) => {
   ctx.body = await TeamYear.get(ctx.params.number, ctx.params.year, ctx.query.refresh);
 });
@@ -76,6 +72,10 @@ addView('/', 'index', async (ctx) => {
 
 addView('/event/:key', 'event', async (ctx) => {
   return { event: await Event.get(ctx.params.key, ctx.query.refresh) };
+});
+
+addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
+  return { teamevent: await TeamEvent.get(ctx.params.number, ctx.params.key, ctx.query.refresh) };
 });
 
 new Koa()
