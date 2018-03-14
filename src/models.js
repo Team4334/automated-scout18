@@ -127,6 +127,19 @@ class Stats {
       this.ccwm[component] = calcCCWM(teams, matches, (x) => x[component]);
     });
 
+    this.ranks = {
+      opr: {},
+      dpr: {},
+      ccwm: {},
+    };
+
+    ['opr', 'dpr', 'ccwm'].forEach(type => {
+      componentOPRs.forEach(component => {
+        this.ranks[type][component] =
+          Object.keys(this[type][component]).sort((a, b) => Number.parseFloat(this[type][component][b]) - Number.parseFloat(this[type][component][a]));
+      });
+    });
+
     const accuracyOfMethod = (accessor) => {
       return 100 * matches.filter((match) => {
         const red = accessor(match.teams.red[0]) + accessor(match.teams.red[1]) + accessor(match.teams.red[2]);
@@ -243,9 +256,13 @@ class TeamEvent {
     this.stats = {};
     Object.keys(event.stats).forEach(type => {
       if (type === 'bests') { return; }
+      if (type === 'ranks') { return; }
       this.stats[type] = { };
       Object.keys(event.stats[type]).forEach(key => {
-        this.stats[type][key] = event.stats[type][key][team.key];
+        this.stats[type][key] = {
+          value: event.stats[type][key][team.key],
+          rank: event.stats.ranks[type][key].indexOf(team.key) + 1,
+        };
       });
     });
   }
