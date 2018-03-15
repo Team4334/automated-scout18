@@ -19,7 +19,7 @@ block content
   .row
     each team in event.prediction.ranking.record
       .col-xs-4.col-sm-2
-        p #{team.substr(3)} (#{event.prediction.teams[team].wins}-#{event.prediction.teams[team].ties}-#{event.prediction.teams[team].loses})
+        p #{team.substr(3)} (#{event.prediction.teams[team].wins}-#{event.prediction.teams[team].loses}-#{event.prediction.teams[team].ties})
 
   include match
   each match in event.matches
