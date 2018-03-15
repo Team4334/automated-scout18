@@ -2,8 +2,24 @@ extends layout
 
 block content
   br
-  #json
-  #content(style="display:none")= JSON.stringify(teamevent)
+
+  #auto-data(style="display:none")= JSON.stringify(teamevent)
+
+  if scouting.matches
+    #manual-data(style="display:none")= JSON.stringify(scouting.matches)
+  if scouting.pit
+    each attachment in scouting.pit.attachments
+      a(href='data:image/jpg;base64,' + attachment, target="_blank")
+        img(src='data:image/jpg;base64,' + attachment, width="20%")
+    - delete scouting.pit.attachments
+    #pit-data(style="display:none")= JSON.stringify(scouting.pit)
+
+  h3 Pit Scouting
+  #pit-view
+  h3 Automated Scouting
+  #auto-view
+  h3 Manual Scouting
+  #manual-view
 
   script
     | // Copyright © 2013-2017 David Caldwell <david@porkrind.org>
@@ -215,6 +231,13 @@ block content
     | else (module||{}).exports = (window||{}).renderjson = renderjson;
     |
     | renderjson.set_show_to_level(2);
-    | document.getElementById("json").appendChild(
-    |     renderjson(JSON.parse($("#content").text()))
+    | document.getElementById("auto-view").appendChild(
+    |     renderjson(JSON.parse($("#auto-data").text()))
+    | );
+    | renderjson.set_show_to_level(3);
+    | document.getElementById("manual-view").appendChild(
+    |     renderjson(JSON.parse($("#manual-data").text()))
+    | );
+    | document.getElementById("pit-view").appendChild(
+    |     renderjson(JSON.parse($("#pit-data").text()))
     | );

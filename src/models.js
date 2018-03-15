@@ -79,7 +79,7 @@ class Match {
     const winner = (match.alliances.blue.score > match.alliances.red.score) ? 'blue' : ((match.alliances.red.score > match.alliances.blue.score) ? 'red' : (match.alliances.red.score === match.alliances.blue.score ? 'tie' : null));
     this.result = {
       winner,
-      loser: winner === 'red' ? 'blue' : (winner === 'blue' ? 'red' : null),
+      loser: winner === 'red' ? 'blue' : 'red',
       blue: {
         score: match.alliances.blue.score,
         breakdown: match.score_breakdown.blue,
@@ -205,6 +205,7 @@ class Event {
           type: bestType,
           component: bestComponent,
           winner: red > blue ? 'red' : 'blue',
+          loser: red < blue ? 'red' : 'blue',
           red, blue,
         },
       };

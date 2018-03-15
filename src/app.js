@@ -2,6 +2,7 @@ const Koa = require('koa');
 const Router = require('koa-router');
 const pug = require('pug');
 const tba = require('./tba');
+const scouting = require('./scouty-mcscout');
 
 const router = new Router();
 
@@ -75,7 +76,19 @@ addView('/event/:key', 'event', async (ctx) => {
 });
 
 addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
-  return { teamevent: await TeamEvent.get(ctx.params.number, ctx.params.key, ctx.query.refresh) };
+  const teamevent = await TeamEvent.get(ctx.params.number, ctx.params.key, ctx.query.refresh);
+
+  if (ctx.params.key === '2018bcvi') {
+    return {
+      teamevent,
+      scouting: {
+        pit: await scouting.getTeamPit(ctx.params.number),
+        matches: await scouting.getTeamMatches(ctx.params.number, teamevent),
+      },
+    };
+  } else {
+    return { teamevent };
+  }
 });
 
 new Koa()

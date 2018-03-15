@@ -11,6 +11,7 @@
     "fix": "eslint --fix --ext .js ./"
   },
   "dependencies": {
+    "cradle": "^0.7.1",
     "koa": "^2.4.1",
     "koa-router": "^7.3.0",
     "lodash": "^4.17.4",
