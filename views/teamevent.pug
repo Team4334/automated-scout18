@@ -12,10 +12,10 @@ block content
       a(href='data:image/jpg;base64,' + attachment, target="_blank")
         img(src='data:image/jpg;base64,' + attachment, width="20%")
     - delete scouting.pit.attachments
-    #pit-data(style="display:none")= JSON.stringify(scouting.pit)
+    #pit-data(style="display:none")= "[" + JSON.stringify(scouting.pit) + "]"
 
   h3 Pit Scouting
-  #pit-view
+  table#pit-table.display(width='100%')
   h3 Automated Scouting
   #auto-view
   h3 Manual Scouting
@@ -234,9 +234,6 @@ block content
     | document.getElementById("auto-view").appendChild(
     |     renderjson(JSON.parse($("#auto-data").text()))
     | );
-    | document.getElementById("pit-view").appendChild(
-    |     renderjson(JSON.parse($("#pit-data").text()))
-    | );
     |  $(document).ready(function() {
     |      var $records = $('#manual-data'),
     |      myRecords = JSON.parse($records.text());
@@ -305,6 +302,53 @@ block content
     |          { data: "notesAndComments",
     |            title: "Comments"
     |          }
+    |      ]
+    |   } );
+    |  } );
+    |  $(document).ready(function() {
+    |      var $records = $('#pit-data'),
+    |      myRecords = JSON.parse($records.text());
+    |    $('#pit-table').DataTable( {
+    |      colReorder: true,
+    |      scrollX: true,
+    |      scrollY: "800px",
+    |      scrollCollapse: true,
+    |      fixedColumns: true,
+    |      data: myRecords,
+    |      columns: [
+    |          { data: "_id",
+    |            title: "ID"
+    |          },
+    |          { data: "scoutName",
+    |            title: "Scout Name"
+    |          },
+    |          { data: "manipulatorType",
+    |            title: "Manipulator Type"
+    |          },
+    |          { data: "placeCubes",
+    |            title: "Can Place Cubes In"
+    |          },
+    |          { data: "robotSize", 
+    |            title: "Robot Size"
+    |          },
+    |          { data: "robotAppearance",
+    |            title: "Overall Appearance"
+    |          },
+    |          { data: "pitSkill",
+    |            title: "Pit Crew Skill"
+    |          },
+    |          { data: "climberType",
+    |            title: "Climber Type"
+    |          },
+    |          { data: "robotDone",
+    |           title: "Robot Done"
+    |          },
+    |          { data: "robotBroken",
+    |           title: "Robot Broken"
+    |          },
+    |          { data: "notesAndComments",
+    |           title: "Comments"
+    |          },
     |      ]
     |   } );
     |  } );
