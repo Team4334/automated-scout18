@@ -77,17 +77,22 @@ addView('/event/:key', 'event', async (ctx) => {
 
 addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
   const teamevent = await TeamEvent.get(ctx.params.number, ctx.params.key, ctx.query.refresh);
+  const dbname = ctx.params.key.substring(4, 8) + ctx.params.key.substring(0, 4);
 
   if (ctx.params.key === '2018bcvi') {
     return {
       teamevent,
       scouting: {
-        pit: await scouting.getTeamPit(ctx.params.number),
-        matches: await scouting.getTeamMatches(ctx.params.number, teamevent),
+        pit: await scouting.getTeamPit(dbname, ctx.params.number),
+        matches: await scouting.getTeamMatches(dbname, ctx.params.number, teamevent),
       },
     };
   } else {
-    return { teamevent };
+    return {
+      teamevent,
+      scouting: {
+      },
+    };
   }
 });
 

@@ -1,12 +1,11 @@
 const { promisify } = require('util');
 const cradle = require('cradle');
 
-const db = new (cradle.Connection)('http://35.230.125.220', 5984, {
-  auth: { username: 'team4334', password: 'albertatechalliance' }
-}).database('scouting-victoria');
-
 module.exports = {
-  getTeamMatches: async (teamNumber, teamevent) => {
+  getTeamMatches: async (dbname, teamNumber, teamevent) => {
+    const db = new (cradle.Connection)('http://35.230.125.220', 5984, {
+      auth: { username: 'team4334', password: 'albertatechalliance' }
+    }).database(dbname);
     const matches = await Promise.all(
       teamevent.matches
         .map(match => match.match(/qm(\d+)/))
@@ -26,14 +25,17 @@ module.exports = {
     };
   },
 
-  getTeamPit: async (teamNumber) => {
+  getTeamPit: async (dbname, teamNumber) => {
+    const db = new (cradle.Connection)('http://35.230.125.220', 5984, {
+      auth: { username: 'team4334', password: 'albertatechalliance' }
+    }).database(dbname);
     return new Promise((resolve, reject) => {
       db.get(`pit_${teamNumber}`, function (err, doc) {
         if (err) { reject(err); return; }
 
         Promise.all(Object.keys(doc._attachments).map(att => {
           return new Promise((r, j) => {
-            db.getAttachment(`pit_${teamNumber}`, att, function(err, reply) {
+            db.getAttachment(`pit_${teamNumber}`, att, function (err, reply) {
               r(reply.body.toString('base64'));
             });
           });
