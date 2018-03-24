@@ -3,8 +3,8 @@ const cradle = require('cradle');
 
 module.exports = {
   getTeamMatches: async (dbname, teamNumber, teamevent) => {
-    const db = new (cradle.Connection)('http://35.230.125.220', 5984, {
-      auth: { username: 'team4334', password: 'albertatechalliance' }
+    const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
+      auth: { username: 'username', password: 'password' }
     }).database(dbname);
     const matches = await Promise.all(
       teamevent.matches
@@ -26,8 +26,8 @@ module.exports = {
   },
 
   getTeamPit: async (dbname, teamNumber) => {
-    const db = new (cradle.Connection)('http://35.230.125.220', 5984, {
-      auth: { username: 'team4334', password: 'albertatechalliance' }
+    const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
+      auth: { username: 'username', password: 'password' }
     }).database(dbname);
     return new Promise((resolve, reject) => {
       db.get(`pit_${teamNumber}`, function (err, doc) {

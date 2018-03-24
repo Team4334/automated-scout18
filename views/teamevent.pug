@@ -6,7 +6,7 @@ block content
   #auto-data(style="display:none")= JSON.stringify(teamevent)
 
   if scouting.matches
-    #manual-data(style="display:none")= JSON.stringify(scouting.matches)
+    #manual-data(style="display:none")= JSON.stringify(scouting.matches).slice(11,-1)
   if scouting.pit
     each attachment in scouting.pit.attachments
       a(href='data:image/jpg;base64,' + attachment, target="_blank")
@@ -19,7 +19,7 @@ block content
   h3 Automated Scouting
   #auto-view
   h3 Manual Scouting
-  #manual-view
+  table#manual-table.display(width='100%')
 
   script
     | // Copyright © 2013-2017 David Caldwell <david@porkrind.org>
@@ -234,10 +234,77 @@ block content
     | document.getElementById("auto-view").appendChild(
     |     renderjson(JSON.parse($("#auto-data").text()))
     | );
-    | renderjson.set_show_to_level(3);
-    | document.getElementById("manual-view").appendChild(
-    |     renderjson(JSON.parse($("#manual-data").text()))
-    | );
     | document.getElementById("pit-view").appendChild(
     |     renderjson(JSON.parse($("#pit-data").text()))
     | );
+    |  $(document).ready(function() {
+    |      var $records = $('#manual-data'),
+    |      myRecords = JSON.parse($records.text());
+    |    $('#manual-table').DataTable( {
+    |      colReorder: true,
+    |      scrollX: true,
+    |      scrollY: "800px",
+    |      scrollCollapse: true,
+    |      fixedColumns: true,
+    |      data: myRecords,
+    |      columns: [
+    |          { data: "_id",
+    |            title: "ID"
+    |          },
+    |          { data: "scoutName",
+    |            title: "Scout Name"
+    |          },
+    |          { data: "startingPosition",
+    |            title: "Starting Position"
+    |          },
+    |          { data: "autoCrossedBaseline",
+    |            title: "Auto Crossed Baseline"
+    |          },
+    |          { data: "autoSwitchCube", 
+    |            title: "Auto Cube in Switch"
+    |          },
+    |          { data: "autoScaleCube",
+    |            title: "Auto Cube in Scale"
+    |          },
+    |          { data: "teleopScaleCubes",
+    |            title: "Cubes in Scale"
+    |          },
+    |          { data: "teleopSwitchCubes",
+    |            title: "Cubes in Switch"
+    |          },
+    |          { data: "teleopOpponentSwitchCubes",
+    |           title: "Cubes in Opponent Switch"
+    |          },
+    |          { data: "teleopExchangeCubes",
+    |           title: "Cubes in Exchange"
+    |          },
+    |          { data: "teleopDroppedCubes",
+    |           title: "Cubes Dropped"
+    |          },
+    |          { data: "climbingType",
+    |           title: "Climbing Type"
+    |          },
+    |          { data: "speedRating",
+    |           title:"Speed Rating"
+    |          },
+    |          { data: "stabilityRating",
+    |            title: "Stablilty Rating"
+    |          },
+    |          { data: "skillRating",
+    |            title: "Skill Rating"
+    |          },
+    |          { data: "defenceRating",
+    |            title:"Defence Rating"
+    |          },
+    |          { data: "anythingBreak",
+    |            title: "Anything Break"
+    |          },
+    |          { data: "robotDead",
+    |            title: "Robot Dead"
+    |          },
+    |          { data: "notesAndComments",
+    |            title: "Comments"
+    |          }
+    |      ]
+    |   } );
+    |  } );
