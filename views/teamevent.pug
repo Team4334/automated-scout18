@@ -20,6 +20,20 @@ block content
   #auto-view
   h3 Manual Scouting
   table#manual-table.display(width='100%')
+  h3 Manual Scouting Charts
+  select#yaxis.custom-select.mr-sm-2
+    option(value='') Choose...
+    option(value='6') Cubes in Scale
+    option(value='7') Cubes in Switch
+    option(value='8') Cubes in Opponent Switch
+    option(value='9') Cubes in Exchange
+    option(value='10') Cubes Dropped
+    option(value='11') Success Percent
+    option(value='13') Speed Rating
+    option(value='14') Stability Rating
+    option(value='15') Skill Rating
+    option(value='16') Defence Rating
+  canvas#manualChartCanvas(width='100%', height='50')
 
   script
     | // Copyright © 2013-2017 David Caldwell <david@porkrind.org>
@@ -246,6 +260,7 @@ block content
     |      data: myRecords,
     |      columns: [
     |          { data: "_id",
+    |            type: "natural",
     |            title: "ID"
     |          },
     |          { data: "scoutName",
@@ -368,6 +383,60 @@ block content
     |      "robotDead": col19,
     |      "notesAndComments": col20,    
     |    } ] ).draw();
+    |
+    | $('#yaxis').on('change', function (e) {
+    |  var ctx = document.getElementById("manualChartCanvas");
+    |  if (window.manualChart != null) {
+    |     window.manualChart.destroy();
+    |  }
+    |  window.manualChart = new Chart(ctx, {
+    |      type: 'bar',
+    |      data: {
+    |          labels: t.column( 0 ).data(),
+    |          datasets: [{
+    |              label: t.settings().init().columns[$('#yaxis').val()].title,
+    |              data: t.column( $('#yaxis').val() ).data(),
+    |              backgroundColor: [
+    |                  'rgba(255, 99, 132, 0.2)',
+    |                  'rgba(54, 162, 235, 0.2)',
+    |                  'rgba(255, 206, 86, 0.2)',
+    |                  'rgba(75, 192, 192, 0.2)',
+    |                  'rgba(153, 102, 255, 0.2)',
+    |                  'rgba(255, 159, 64, 0.2)'
+    |              ],
+    |              borderColor: [
+    |                  'rgba(255,99,132,1)',
+    |                  'rgba(54, 162, 235, 1)',
+    |                  'rgba(255, 206, 86, 1)',
+    |                  'rgba(75, 192, 192, 1)',
+    |                  'rgba(153, 102, 255, 1)',
+    |                  'rgba(255, 159, 64, 1)'
+    |              ],
+    |              borderWidth: 1
+    |          }]
+    |      },
+    |      options: {
+    |          scales: {
+    |              yAxes: [{
+    |                  ticks: {
+    |                      beginAtZero:true
+    |                  },
+    |                  scaleLabel: {
+    |                      display: true,
+    |                      labelString: t.settings().init().columns[$('#yaxis').val()].title,
+    |                  }
+    |              }],
+    |                xAxes: [{
+    |                  scaleLabel: {
+    |                      display: true,
+    |                      labelString: 'Match'
+    |                  }
+    |              }]
+    |          }
+    |      }
+    |  });
+    |
+    | });
     | } );
     |  $(document).ready(function() {
     |      var $records = $('#pit-data'),
