@@ -278,6 +278,9 @@ block content
     |          { data: "teleopDroppedCubes",
     |           title: "Cubes Dropped"
     |          },
+    |          { data: "successPercent",
+    |            title: "Success Percent"
+    |          },
     |          { data: "climbingType",
     |           title: "Climbing Type"
     |          },
@@ -326,22 +329,23 @@ block content
     | var col1 = "Average";
     | var col2 = mode(t.column( 1 ).data());
     | var col3 = mode(t.column( 2 ).data())
-    | var col4 = t.column( 3 ).data().average();
-    | var col5 = t.column( 4 ).data().average();
-    | var col6 = t.column( 5 ).data().average();
+    | var col4 = t.column( 3 ).data().average() * 100;
+    | var col5 = t.column( 4 ).data().average() * 100;
+    | var col6 = t.column( 5 ).data().average() * 100;
     | var col7 = t.column( 6 ).data().average();
     | var col8 = t.column( 7 ).data().average();
     | var col9 = t.column( 8 ).data().average();
     | var col10 = t.column( 9 ).data().average();
     | var col11 = t.column( 10 ).data().average();
-    | var col12 = mode(t.column( 3 ).data());
-    | var col13 = t.column( 12 ).data().average();
+    | var col12 = t.column( 11 ).data().average();
+    | var col13 = mode(t.column( 12 ).data());
     | var col14 = t.column( 13 ).data().average();
     | var col15 = t.column( 14 ).data().average();
     | var col16 = t.column( 15 ).data().average();
-    | var col17 = t.column( 16 ).data().average();  
-    | var col18 = t.column( 17 ).data().average();  
-    | var col19 = "."
+    | var col17 = t.column( 16 ).data().average();
+    | var col18 = t.column( 17 ).data().average() * 100;  
+    | var col19 = t.column( 18 ).data().average() * 100;  
+    | var col20 = "."
     |   t.rows.add( [ {
     |      "_id": col1,
     |      "scoutName": col2,
@@ -354,14 +358,15 @@ block content
     |      "teleopOpponentSwitchCubes": col9,
     |      "teleopExchangeCubes": col10,
     |      "teleopDroppedCubes": col11,
-    |      "climbingType": col12,
-    |      "speedRating": col13,
-    |      "stabilityRating": col14,
-    |      "skillRating": col15,
-    |      "defenceRating": col16,          
-    |      "anythingBreak": col17,  
-    |      "robotDead": col18,
-    |      "notesAndComments": col19,    
+    |      "successPercent": col12,
+    |      "climbingType": col13,
+    |      "speedRating": col14,
+    |      "stabilityRating": col15,
+    |      "skillRating": col16,
+    |      "defenceRating": col17,          
+    |      "anythingBreak": col18,  
+    |      "robotDead": col19,
+    |      "notesAndComments": col20,    
     |    } ] ).draw();
     | } );
     |  $(document).ready(function() {
