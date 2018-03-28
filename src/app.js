@@ -3,6 +3,7 @@ const Router = require('koa-router');
 const pug = require('pug');
 const tba = require('./tba');
 const scouting = require('./scouty-mcscout');
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 const router = new Router();
 
@@ -42,7 +43,7 @@ const addView = (path, view, getModel) => {
 addView('/', 'index', async (ctx) => {
   const events = await tba.get('/events/2018/simple');
 
-  events.sort(function(a, b) {
+  events.sort(function (a, b) {
     let s = Date.parse(a.start_date) - Date.parse(b.start_date);
     if (s == 0) {
       s = a.key.localeCompare(b.key);
@@ -78,8 +79,27 @@ addView('/event/:key', 'event', async (ctx) => {
 addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
   const teamevent = await TeamEvent.get(ctx.params.number, ctx.params.key, ctx.query.refresh);
   const dbname = ctx.params.key.substring(4, 8) + ctx.params.key.substring(0, 4);
+  var exists = "";
 
-  if (ctx.params.key === '2018bcvi') {
+  var xhr = new XMLHttpRequest();
+  xhr.open('HEAD', 'http://127.0.0.1:5984/' + dbname, false, "username", "password");
+  xhr.onload = function() {
+      if (xhr.status === 200) {
+        exists = true;
+      } else if (xhr.status == 404) {
+        console.log("Database not found. " + dbname)
+        exists = false;
+      } else if (xhr.status == 401) {
+        console.log("Incorrect username or password.");
+        exists = false;
+      } else {
+        console.log("Database responded with:" + xhr.status);
+        exists = false;
+      }
+  };
+  xhr.send();
+  
+  if (exists == true) {
     return {
       teamevent,
       scouting: {
