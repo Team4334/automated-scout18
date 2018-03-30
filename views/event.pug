@@ -8,6 +8,7 @@ block content
   - const predictor = event.stats.bests[0].type.split('-');
   p Best predictor of match outcome: #{predictor[0].toUpperCase()} (#{predictor[1]})
   p Accuracy: #{event.stats.bests[0].accuracy.toFixed(2)}% (scores in brackets)
+  a.btn.btn-info(href="/event/" + event.key + "/compare" style="margin-bottom:15px", role='button') Compare Manual Data
 
   .row
     each team in event.teams.map((t) => t.substr(3)).sort((a, b) => a - b)

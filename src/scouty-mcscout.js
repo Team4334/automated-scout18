@@ -1,6 +1,8 @@
 const { promisify } = require('util');
 const cradle = require('cradle');
 
+const { TeamEvent } = require('./models');
+
 module.exports = {
   getTeamMatches: async (dbname, teamNumber, teamevent) => {
     const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
@@ -49,5 +51,81 @@ module.exports = {
           });
       });
     });
+  },
+  getTeamAverage: async (dbname, eventKey, teams) => {
+    const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
+      auth: { username: 'username', password: 'password' }
+    }).database(dbname);
+    var allTeamAverages = [];
+    for (var a = 0, length = teams.teams.length; a < length; a++) {
+      var team = teams.teams[a].substring(3, 7);
+      var teamevent = await TeamEvent.get(team, eventKey, "abc");
+      const matches = await Promise.all(
+        teamevent.matches
+          .map(match => match.match(/qm(\d+)/))
+          .filter(match => !!match)
+          .map(match => match[1])
+          .filter(match => !!match)
+          .map((match) => {
+            return new Promise((resolve, reject) => {
+              db.get(`q${match}_${team}`, function (err, doc) {
+                if (err) { resolve(null); } else { resolve(doc); }
+              });
+            });
+          }));
+      const teamMatches = matches.filter(m => !!m);
+      function sum(key) {
+        var sum = 0;
+        for (var i = 0, length = teamMatches.length; i < length; i++) {
+          sum = sum + teamMatches[i][key];
+        }
+        return sum;
+      }
+      function mode(key) {
+        var modeArray = [];
+        for (var i = 0, length = teamMatches.length; i < length; i++) {
+          modeArray.push(teamMatches[i][key]);
+        }
+        let mf = 1;
+        let m = 0;
+        let item;
+        for (let i = 0; i < modeArray.length; i++) {
+          for (let j = i; j < modeArray.length; j++) {
+            if (modeArray[i] == modeArray[j])
+              m++;
+            if (mf < m) {
+              mf = m;
+              item = modeArray[i];
+            }
+          }
+          m = 0;
+        }
+        var result = `${item}`;
+        return result;
+      }
+      const teamAverages = {
+        "_id": team,
+        "scoutName": mode("scoutName"),
+        "startingPosition": mode("startingPosition"),
+        "autoCrossedBaseline": sum("autoCrossedBaseline") / teamMatches.length * 100,
+        "autoSwitchCube": sum("autoSwitchCube") / teamMatches.length * 100,
+        "autoScaleCube": sum("autoScaleCube") / teamMatches.length * 100,
+        "teleopScaleCubes": sum("teleopScaleCubes") / teamMatches.length,
+        "teleopSwitchCubes": sum("teleopSwitchCubes") / teamMatches.length,
+        "teleopOpponentSwitchCubes": sum("teleopOpponentSwitchCubes") / teamMatches.length,
+        "teleopExchangeCubes": sum("teleopExchangeCubes") / teamMatches.length,
+        "teleopDroppedCubes": sum("teleopDroppedCubes") / teamMatches.length,
+        "successPercent": sum("successPercent") / teamMatches.length,
+        "climbingType": mode("climbingType"),
+        "speedRating": sum("speedRating") / teamMatches.length,
+        "stabilityRating": sum("stabilityRating") / teamMatches.length,
+        "skillRating": sum("skillRating") / teamMatches.length,
+        "defenceRating": sum("defenceRating") / teamMatches.length,
+        "anythingBreak": sum("anythingBreak") / teamMatches.length * 100,
+        "robotDead": sum("robotDead") / teamMatches.length * 100,
+      }
+      allTeamAverages.push(teamAverages);;
+    }
+    return allTeamAverages;
   },
 };

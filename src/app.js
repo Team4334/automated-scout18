@@ -98,7 +98,7 @@ addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
       }
   };
   xhr.send();
-  
+
   if (exists == true) {
     return {
       teamevent,
@@ -114,6 +114,33 @@ addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
       },
     };
   }
+});
+
+addView('/event/:key/compare', 'compare', async (ctx) => {
+  const teams = await Event.get(ctx.params.key, ctx.query.refresh);
+  const dbname = ctx.params.key.substring(4, 8) + ctx.params.key.substring(0, 4);
+  var exists = "";
+  
+  var xhr = new XMLHttpRequest();
+  xhr.open('HEAD', 'http://127.0.0.1:5984/' + dbname, false, "username", "password");
+  xhr.onload = function() {
+      if (xhr.status === 200) {
+        exists = true;
+      } else if (xhr.status == 404) {
+        console.log("Database not found. " + dbname)
+        exists = false;
+      } else if (xhr.status == 401) {
+        console.log("Incorrect username or password.");
+        exists = false;
+      } else {
+        console.log("Database responded with:" + xhr.status);
+        exists = false;
+      }
+  };
+  xhr.send();
+  return {
+    average: await scouting.getTeamAverage(dbname, ctx.params.key, teams),
+  };
 });
 
 new Koa()
