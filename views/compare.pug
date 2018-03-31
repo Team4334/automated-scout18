@@ -4,6 +4,7 @@ block content
   br
 
   #averages(style="display:none")= JSON.stringify(average)
+  #pit-data(style="display:none")= JSON.stringify(pit)
 
 
   h3 Compare Team Matches
@@ -23,6 +24,9 @@ block content
     option(value='15') Skill Rating
     option(value='16') Defence Rating
   canvas#manualChartCanvas(width='100%', height='50')
+
+  h3 Compare Manual Pit Data
+  table#pit-table.display(width='100%')
 
   script
     |  $(document).ready(function() {
@@ -153,4 +157,52 @@ block content
     | });
     |
     |});
+    |  $(document).ready(function() {
+    |      var $records = $('#pit-data'),
+    |      myRecords = JSON.parse($records.text());
+    |    $('#pit-table').DataTable( {
+    |      colReorder: true,
+    |      scrollX: true,
+    |      scrollY: "600px",
+    |      scrollCollapse: true,
+    |      fixedColumns: true,
+    |      paging: false,
+    |      data: myRecords,
+    |      columns: [
+    |          { data: "_id",
+    |            title: "ID"
+    |          },
+    |          { data: "scoutName",
+    |            title: "Scout Name"
+    |          },
+    |          { data: "manipulatorType",
+    |            title: "Manipulator Type"
+    |          },
+    |          { data: "placeCubes",
+    |            title: "Can Place Cubes In"
+    |          },
+    |          { data: "robotSize", 
+    |            title: "Robot Size"
+    |          },
+    |          { data: "robotAppearance",
+    |            title: "Overall Appearance"
+    |          },
+    |          { data: "pitSkill",
+    |            title: "Pit Crew Skill"
+    |          },
+    |          { data: "climberType",
+    |            title: "Climber Type"
+    |          },
+    |          { data: "robotDone",
+    |           title: "Robot Done"
+    |          },
+    |          { data: "robotBroken",
+    |           title: "Robot Broken"
+    |          },
+    |          { data: "notesAndComments",
+    |           title: "Comments"
+    |          },
+    |      ]
+    |   } );
+    |  } );
 

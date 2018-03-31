@@ -140,6 +140,7 @@ addView('/event/:key/compare', 'compare', async (ctx) => {
   xhr.send();
   return {
     average: await scouting.getTeamAverage(dbname, ctx.params.key, teams),
+    pit: await scouting.getAllTeamPit(dbname, teams)
   };
 });
 

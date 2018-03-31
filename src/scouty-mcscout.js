@@ -128,4 +128,36 @@ module.exports = {
     }
     return allTeamAverages;
   },
+  getAllTeamPit: async (dbname, teams) => {
+    const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
+      auth: { username: 'username', password: 'password' }
+    }).database(dbname);
+    var allTeamPit = [];
+    async function getPit (team) {
+      return new Promise((resolve, reject) => {
+        db.get('pit_' + team, function (err, doc) {
+          if (err) { reject(err); return; }
+  
+          Promise.all(Object.keys(doc._attachments).map(att => {
+            return new Promise((r, j) => {
+              db.getAttachment('pit_' + team, att, function (err, reply) {
+                r(reply.body.toString('base64'));
+              });
+            });
+          }))
+            .then(attachments => {
+              delete doc._attachments;
+              resolve({
+                ...doc
+              });
+            });
+        });
+      });
+    }
+    for (var i = 0, length = teams.teams.length; i < length; i++) {
+      var team = teams.teams[i].substring(3, 7);
+      allTeamPit.push(await getPit(team));
+    }
+    return allTeamPit;
+  },
 };
