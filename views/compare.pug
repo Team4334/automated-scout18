@@ -101,7 +101,65 @@ block content
     |          }
     |      ]
     |   } );
+    |  function mode(array) {
+    |  let mf = 1;
+    |  let m = 0;
+    |  let item;
+    |  for (let i = 0; i < array.length; i++) {
+    |      for (let j = i; j < array.length; j++) {
+    |          if (array[i] == array[j])
+    |              m++;
+    |          if (mf < m) {
+    |              mf = m;
+    |              item = array[i];
+    |          }
+    |      }
+    |      m = 0;
+    | }
+    |  var result = `${item}`;
+    |  return result;
+    |  }
     | var t = $('#manual-table').DataTable();
+    | var col1 = "Average";
+    | var col2 = mode(t.column( 1 ).data());
+    | var col3 = mode(t.column( 2 ).data())
+    | var col4 = t.column( 3 ).data().average() * 100;
+    | var col5 = t.column( 4 ).data().average() * 100;
+    | var col6 = t.column( 5 ).data().average() * 100;
+    | var col7 = t.column( 6 ).data().average();
+    | var col8 = t.column( 7 ).data().average();
+    | var col9 = t.column( 8 ).data().average();
+    | var col10 = t.column( 9 ).data().average();
+    | var col11 = t.column( 10 ).data().average();
+    | var col12 = t.column( 11 ).data().average();
+    | var col13 = mode(t.column( 12 ).data());
+    | var col14 = t.column( 13 ).data().average();
+    | var col15 = t.column( 14 ).data().average();
+    | var col16 = t.column( 15 ).data().average();
+    | var col17 = t.column( 16 ).data().average();
+    | var col18 = t.column( 17 ).data().average() * 100;  
+    | var col19 = t.column( 18 ).data().average() * 100;  
+    |   t.rows.add( [ {
+    |      "_id": col1,
+    |      "scoutName": col2,
+    |      "startingPosition": col3,
+    |      "autoCrossedBaseline": col4,
+    |      "autoSwitchCube": col5,
+    |      "autoScaleCube": col6,
+    |      "teleopScaleCubes": col7,         
+    |      "teleopSwitchCubes": col8,
+    |      "teleopOpponentSwitchCubes": col9,
+    |      "teleopExchangeCubes": col10,
+    |      "teleopDroppedCubes": col11,
+    |      "successPercent": col12,
+    |      "climbingType": col13,
+    |      "speedRating": col14,
+    |      "stabilityRating": col15,
+    |      "skillRating": col16,
+    |      "defenceRating": col17,          
+    |      "anythingBreak": col18,  
+    |      "robotDead": col19,
+    |    } ] ).draw();
     | $('#yaxis').on('change', function (e) {
     |  var ctx = document.getElementById("manualChartCanvas");
     |  if (window.manualChart != null) {
@@ -204,5 +262,49 @@ block content
     |          },
     |      ]
     |   } );
+    |  function mode(array) {
+    |  let mf = 1;
+    |  let m = 0;
+    |  let item;
+    |  for (let i = 0; i < array.length; i++) {
+    |      for (let j = i; j < array.length; j++) {
+    |          if (array[i] == array[j])
+    |              m++;
+    |          if (mf < m) {
+    |              mf = m;
+    |              item = array[i];
+    |          }
+    |      }
+    |      m = 0;
+    | }
+    |  var result = `${item}`;
+    |  return result;
+    |  }
+    | var t = $('#pit-table').DataTable();
+    | var col1 = "Average";
+    | var col2 = mode(t.column( 1 ).data());
+    | var col3 = mode(t.column( 2 ).data());
+    | var col4 = mode(t.column( 3 ).data());
+    | var col5 = mode(t.column( 4 ).data());
+    | var col6 = t.column( 5 ).data().average();
+    | var col7 = t.column( 6 ).data().average();
+    | var col8 = mode(t.column( 7 ).data());
+    | var col9 = t.column( 8 ).data().average() * 100;
+    | var col10 = t.column( 9 ).data().average() * 100;
+    | var col11 = ".";
+    |   t.rows.add( [ {
+    |      "_id": col1,
+    |      "scoutName": col2,
+    |      "manipulatorType": col3,
+    |      "placeCubes": col4,
+    |      "robotSize": col5,
+    |      "robotAppearance": col6,
+    |      "pitSkill": col7,         
+    |      "climberType": col8,
+    |      "robotDone": col9,
+    |      "robotBroken": col10,
+    |      "notesAndComments": col11,
+    |    } ] ).draw();
+    |
     |  } );
 
