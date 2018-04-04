@@ -1,5 +1,6 @@
 const { promisify } = require('util');
 const cradle = require('cradle');
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 const { TeamEvent } = require('./models');
 
@@ -31,26 +32,63 @@ module.exports = {
     const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
       auth: { username: 'username', password: 'password' }
     }).database(dbname);
-    return new Promise((resolve, reject) => {
-      db.get(`pit_${teamNumber}`, function (err, doc) {
-        if (err) { reject(err); return; }
+    var allRevs = [];
+    async function getPit(db, rev, team) {
+      return new Promise((resolve, reject) => {
+        db.get(`pit_${teamNumber}`, rev, function (err, doc) {
+          if (err) { reject(err); return; }
 
-        Promise.all(Object.keys(doc._attachments).map(att => {
-          return new Promise((r, j) => {
-            db.getAttachment(`pit_${teamNumber}`, att, function (err, reply) {
-              r(reply.body.toString('base64'));
+          Promise.all(Object.keys(doc._attachments).map(att => {
+            return new Promise((r, j) => {
+              db.getAttachment(`pit_${teamNumber}`, att, function (err, reply) {
+                r(reply.body.toString('base64'));
+              });
             });
-          });
-        }))
-          .then(attachments => {
-            delete doc._attachments;
-            resolve({
-              ...doc,
-              attachments,
+          }))
+            .then(attachments => {
+              delete doc._attachments;
+              resolve({
+                ...doc
+              });
             });
-          });
+        });
       });
-    });
+    }
+    async function getPhotos(db, team) {
+      return new Promise((resolve, reject) => {
+        db.get(`pit_${teamNumber}`, function (err, doc) {
+          if (err) { reject(err); return; }
+
+          Promise.all(Object.keys(doc._attachments).map(att => {
+            return new Promise((r, j) => {
+              db.getAttachment(`pit_${teamNumber}`, att, function (err, reply) {
+                r(reply.body.toString('base64'));
+              });
+            });
+          }))
+            .then(attachments => {
+              delete doc._attachments;
+              resolve({
+                attachments
+              });
+            });
+        });
+      });
+    }
+    var revs = "";
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://127.0.0.1:5984/' + dbname + "/pit_" + teamNumber + "?revs_info=true", false, "username", "password");
+    xhr.onload = function () {
+      revs = JSON.parse(xhr.responseText);
+    };
+    xhr.send();
+    for (var i = 0, length = revs._revs_info.length; i < length; i++) {
+      allRevs.push(await getPit(db, revs._revs_info[i].rev, teamNumber));
+    }
+    return {
+      data: allRevs,
+      attachments: await getPhotos(db, teamNumber)
+    }
   },
   getTeamAverage: async (dbname, eventKey, teams) => {
     const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
@@ -133,11 +171,11 @@ module.exports = {
       auth: { username: 'username', password: 'password' }
     }).database(dbname);
     var allTeamPit = [];
-    async function getPit (team) {
+    async function getPit(team) {
       return new Promise((resolve, reject) => {
         db.get('pit_' + team, function (err, doc) {
           if (err) { reject(err); return; }
-  
+
           Promise.all(Object.keys(doc._attachments).map(att => {
             return new Promise((r, j) => {
               db.getAttachment('pit_' + team, att, function (err, reply) {

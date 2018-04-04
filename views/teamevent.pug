@@ -8,11 +8,11 @@ block content
   if scouting.matches
     #manual-data(style="display:none")= JSON.stringify(scouting.matches).slice(11,-1)
   if scouting.pit
-    each attachment in scouting.pit.attachments
+    each attachment in scouting.pit.attachments.attachments
       a(href='data:image/jpg;base64,' + attachment, target="_blank")
         img(src='data:image/jpg;base64,' + attachment, width="20%")
     - delete scouting.pit.attachments
-    #pit-data(style="display:none")= "[" + JSON.stringify(scouting.pit) + "]"
+    #pit-data(style="display:none")= JSON.stringify(scouting.pit.data)
 
   h3 Pit Scouting
   table#pit-table.display(width='100%')
@@ -452,6 +452,10 @@ block content
     |      columns: [
     |          { data: "_id",
     |            title: "ID"
+    |          },
+    |          {
+    |            data: "_rev",
+    |            title: "Revision"
     |          },
     |          { data: "scoutName",
     |            title: "Scout Name"
