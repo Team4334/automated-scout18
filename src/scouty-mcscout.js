@@ -72,7 +72,6 @@ module.exports = {
         });
       });
     }
-
     const revs = await request({
       url: `${dbHost}:5984/${dbname}/pit_${teamNumber}?revs_info=true`,
       json: true,
@@ -168,7 +167,7 @@ module.exports = {
     async function getPit(team) {
       return new Promise((resolve, reject) => {
         db.get('pit_' + team, function (err, doc) {
-          if (err) { reject(err); return; }
+          if (err) { resolve(err); return; }
 
           Promise.all(Object.keys(doc._attachments).map(att => {
             return new Promise((r, j) => {

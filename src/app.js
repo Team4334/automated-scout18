@@ -87,8 +87,6 @@ addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
     exists = true;
   } catch (e) {}
 
-  console.log(exists);
-
   if (exists) {
     return {
       teamevent,
