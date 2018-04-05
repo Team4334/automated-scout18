@@ -1,0 +1,310 @@
+extends layout
+
+block content
+  br
+
+  #averages(style="display:none")= JSON.stringify(average)
+  #pit-data(style="display:none")= JSON.stringify(pit)
+
+
+  h3 Compare Team Matches
+  table#manual-table.display(width='100%')
+
+  h3 Team Match Graphs
+  select#yaxis.custom-select.mr-sm-2
+    option(value='') Choose...
+    option(value='6') Cubes in Scale
+    option(value='7') Cubes in Switch
+    option(value='8') Cubes in Opponent Switch
+    option(value='9') Cubes in Exchange
+    option(value='10') Cubes Dropped
+    option(value='11') Success Percent
+    option(value='13') Speed Rating
+    option(value='14') Stability Rating
+    option(value='15') Skill Rating
+    option(value='16') Defence Rating
+  canvas#manualChartCanvas(width='100%', height='50')
+
+  h3 Compare Manual Pit Data
+  table#pit-table.display(width='100%')
+
+  script
+    |  $(document).ready(function() {
+    |      var $records = $('#averages'),
+    |      myRecords = JSON.parse($records.text());
+    |    $('#manual-table').DataTable( {
+    |      colReorder: true,
+    |      scrollX: true,
+    |      paging: false,
+    |      scrollY: "600px",
+    |      scrollCollapse: true,
+    |      fixedColumns: true,
+    |      data: myRecords,
+    |      columns: [
+    |          { data: "_id",
+    |            type: "natural",
+    |            title: "ID"
+    |          },
+    |          { data: "scoutName",
+    |            title: "Scout Name"
+    |          },
+    |          { data: "startingPosition",
+    |            title: "Starting Position"
+    |          },
+    |          { data: "autoCrossedBaseline",
+    |            title: "Auto Crossed Baseline"
+    |          },
+    |          { data: "autoSwitchCube", 
+    |            title: "Auto Cube in Switch"
+    |          },
+    |          { data: "autoScaleCube",
+    |            title: "Auto Cube in Scale"
+    |          },
+    |          { data: "teleopScaleCubes",
+    |            title: "Cubes in Scale"
+    |          },
+    |          { data: "teleopSwitchCubes",
+    |            title: "Cubes in Switch"
+    |          },
+    |          { data: "teleopOpponentSwitchCubes",
+    |           title: "Cubes in Opponent Switch"
+    |          },
+    |          { data: "teleopExchangeCubes",
+    |           title: "Cubes in Exchange"
+    |          },
+    |          { data: "teleopDroppedCubes",
+    |           title: "Cubes Dropped"
+    |          },
+    |          { data: "successPercent",
+    |            title: "Success Percent"
+    |          },
+    |          { data: "climbingType",
+    |           title: "Climbing Type"
+    |          },
+    |          { data: "speedRating",
+    |           title:"Speed Rating"
+    |          },
+    |          { data: "stabilityRating",
+    |            title: "Stablilty Rating"
+    |          },
+    |          { data: "skillRating",
+    |            title: "Skill Rating"
+    |          },
+    |          { data: "defenceRating",
+    |            title:"Defence Rating"
+    |          },
+    |          { data: "anythingBreak",
+    |            title: "Anything Break"
+    |          },
+    |          { data: "robotDead",
+    |            title: "Robot Dead"
+    |          }
+    |      ]
+    |   } );
+    |  function mode(array) {
+    |  let mf = 1;
+    |  let m = 0;
+    |  let item;
+    |  for (let i = 0; i < array.length; i++) {
+    |      for (let j = i; j < array.length; j++) {
+    |          if (array[i] == array[j])
+    |              m++;
+    |          if (mf < m) {
+    |              mf = m;
+    |              item = array[i];
+    |          }
+    |      }
+    |      m = 0;
+    | }
+    |  var result = `${item}`;
+    |  return result;
+    |  }
+    | var t = $('#manual-table').DataTable();
+    | var col1 = "Average";
+    | var col2 = mode(t.column( 1 ).data());
+    | var col3 = mode(t.column( 2 ).data())
+    | var col4 = t.column( 3 ).data().average() * 100;
+    | var col5 = t.column( 4 ).data().average() * 100;
+    | var col6 = t.column( 5 ).data().average() * 100;
+    | var col7 = t.column( 6 ).data().average();
+    | var col8 = t.column( 7 ).data().average();
+    | var col9 = t.column( 8 ).data().average();
+    | var col10 = t.column( 9 ).data().average();
+    | var col11 = t.column( 10 ).data().average();
+    | var col12 = t.column( 11 ).data().average();
+    | var col13 = mode(t.column( 12 ).data());
+    | var col14 = t.column( 13 ).data().average();
+    | var col15 = t.column( 14 ).data().average();
+    | var col16 = t.column( 15 ).data().average();
+    | var col17 = t.column( 16 ).data().average();
+    | var col18 = t.column( 17 ).data().average() * 100;  
+    | var col19 = t.column( 18 ).data().average() * 100;  
+    |   t.rows.add( [ {
+    |      "_id": col1,
+    |      "scoutName": col2,
+    |      "startingPosition": col3,
+    |      "autoCrossedBaseline": col4,
+    |      "autoSwitchCube": col5,
+    |      "autoScaleCube": col6,
+    |      "teleopScaleCubes": col7,         
+    |      "teleopSwitchCubes": col8,
+    |      "teleopOpponentSwitchCubes": col9,
+    |      "teleopExchangeCubes": col10,
+    |      "teleopDroppedCubes": col11,
+    |      "successPercent": col12,
+    |      "climbingType": col13,
+    |      "speedRating": col14,
+    |      "stabilityRating": col15,
+    |      "skillRating": col16,
+    |      "defenceRating": col17,          
+    |      "anythingBreak": col18,  
+    |      "robotDead": col19,
+    |    } ] ).draw();
+    | $('#yaxis').on('change', function (e) {
+    |  var ctx = document.getElementById("manualChartCanvas");
+    |  if (window.manualChart != null) {
+    |     window.manualChart.destroy();
+    |  }
+    |  window.manualChart = new Chart(ctx, {
+    |      type: 'bar',
+    |      data: {
+    |          labels: t.column( 0 ).data(),
+    |          datasets: [{
+    |              label: t.settings().init().columns[$('#yaxis').val()].title,
+    |              data: t.column( $('#yaxis').val() ).data(),
+    |              backgroundColor: [
+    |                  'rgba(255, 99, 132, 0.2)',
+    |                  'rgba(54, 162, 235, 0.2)',
+    |                  'rgba(255, 206, 86, 0.2)',
+    |                  'rgba(75, 192, 192, 0.2)',
+    |                  'rgba(153, 102, 255, 0.2)',
+    |                  'rgba(255, 159, 64, 0.2)'
+    |              ],
+    |              borderColor: [
+    |                  'rgba(255,99,132,1)',
+    |                  'rgba(54, 162, 235, 1)',
+    |                  'rgba(255, 206, 86, 1)',
+    |                  'rgba(75, 192, 192, 1)',
+    |                  'rgba(153, 102, 255, 1)',
+    |                  'rgba(255, 159, 64, 1)'
+    |              ],
+    |              borderWidth: 1
+    |          }]
+    |      },
+    |      options: {
+    |          scales: {
+    |              yAxes: [{
+    |                  ticks: {
+    |                      beginAtZero:true
+    |                  },
+    |                  scaleLabel: {
+    |                      display: true,
+    |                      labelString: t.settings().init().columns[$('#yaxis').val()].title,
+    |                  }
+    |              }],
+    |                xAxes: [{
+    |                  scaleLabel: {
+    |                      display: true,
+    |                      labelString: 'Team'
+    |                  }
+    |              }]
+    |          }
+    |      }
+    |  });
+    |
+    | });
+    |
+    |});
+    |  $(document).ready(function() {
+    |      var $records = $('#pit-data'),
+    |      myRecords = JSON.parse($records.text());
+    |    $('#pit-table').DataTable( {
+    |      colReorder: true,
+    |      scrollX: true,
+    |      scrollY: "600px",
+    |      scrollCollapse: true,
+    |      fixedColumns: true,
+    |      paging: false,
+    |      data: myRecords,
+    |      columns: [
+    |          { data: "_id",
+    |            title: "ID"
+    |          },
+    |          { data: "scoutName",
+    |            title: "Scout Name"
+    |          },
+    |          { data: "manipulatorType",
+    |            title: "Manipulator Type"
+    |          },
+    |          { data: "placeCubes",
+    |            title: "Can Place Cubes In"
+    |          },
+    |          { data: "robotSize", 
+    |            title: "Robot Size"
+    |          },
+    |          { data: "robotAppearance",
+    |            title: "Overall Appearance"
+    |          },
+    |          { data: "pitSkill",
+    |            title: "Pit Crew Skill"
+    |          },
+    |          { data: "climberType",
+    |            title: "Climber Type"
+    |          },
+    |          { data: "robotDone",
+    |           title: "Robot Done"
+    |          },
+    |          { data: "robotBroken",
+    |           title: "Robot Broken"
+    |          },
+    |          { data: "notesAndComments",
+    |           title: "Comments"
+    |          },
+    |      ]
+    |   } );
+    |  function mode(array) {
+    |  let mf = 1;
+    |  let m = 0;
+    |  let item;
+    |  for (let i = 0; i < array.length; i++) {
+    |      for (let j = i; j < array.length; j++) {
+    |          if (array[i] == array[j])
+    |              m++;
+    |          if (mf < m) {
+    |              mf = m;
+    |              item = array[i];
+    |          }
+    |      }
+    |      m = 0;
+    | }
+    |  var result = `${item}`;
+    |  return result;
+    |  }
+    | var t = $('#pit-table').DataTable();
+    | var col1 = "Average";
+    | var col2 = mode(t.column( 1 ).data());
+    | var col3 = mode(t.column( 2 ).data());
+    | var col4 = mode(t.column( 3 ).data());
+    | var col5 = mode(t.column( 4 ).data());
+    | var col6 = t.column( 5 ).data().average();
+    | var col7 = t.column( 6 ).data().average();
+    | var col8 = mode(t.column( 7 ).data());
+    | var col9 = t.column( 8 ).data().average() * 100;
+    | var col10 = t.column( 9 ).data().average() * 100;
+    | var col11 = ".";
+    |   t.rows.add( [ {
+    |      "_id": col1,
+    |      "scoutName": col2,
+    |      "manipulatorType": col3,
+    |      "placeCubes": col4,
+    |      "robotSize": col5,
+    |      "robotAppearance": col6,
+    |      "pitSkill": col7,         
+    |      "climberType": col8,
+    |      "robotDone": col9,
+    |      "robotBroken": col10,
+    |      "notesAndComments": col11,
+    |    } ] ).draw();
+    |
+    |  } );
+
