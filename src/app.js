@@ -79,10 +79,10 @@ addView('/event/:key', 'event', async (ctx) => {
 addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
   const teamevent = await TeamEvent.get(ctx.params.number, ctx.params.key, ctx.query.refresh);
   const dbname = ctx.params.key.substring(4, 8) + ctx.params.key.substring(0, 4);
-  var exists = "";
+  let exists = false;
 
-  var xhr = new XMLHttpRequest();
-  xhr.open('HEAD', 'http://127.0.0.1:5984/' + dbname, false, "username", "password");
+  const xhr = new XMLHttpRequest();
+  xhr.open('HEAD', `${scouting.db.host}/${dbname}`, false, scouting.db.username, scouting.db.password);
   xhr.onload = function() {
       if (xhr.status === 200) {
         exists = true;
@@ -99,7 +99,7 @@ addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
   };
   xhr.send();
 
-  if (exists == true) {
+  if (exists) {
     return {
       teamevent,
       scouting: {
@@ -110,8 +110,7 @@ addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
   } else {
     return {
       teamevent,
-      scouting: {
-      },
+      scouting: { },
     };
   }
 });
@@ -120,7 +119,7 @@ addView('/event/:key/compare', 'compare', async (ctx) => {
   const teams = await Event.get(ctx.params.key, ctx.query.refresh);
   const dbname = ctx.params.key.substring(4, 8) + ctx.params.key.substring(0, 4);
   var exists = "";
-  
+
   var xhr = new XMLHttpRequest();
   xhr.open('HEAD', 'http://127.0.0.1:5984/' + dbname, false, "username", "password");
   xhr.onload = function() {

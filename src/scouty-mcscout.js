@@ -1,13 +1,16 @@
 const { promisify } = require('util');
 const cradle = require('cradle');
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-
+const request = require('request-promise-native');
 const { TeamEvent } = require('./models');
+
+const dbHost = 'http://35.230.125.220';
+const username = 'team4334';
+const password = 'albertatechalliance';
 
 module.exports = {
   getTeamMatches: async (dbname, teamNumber, teamevent) => {
-    const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
-      auth: { username: 'username', password: 'password' }
+    const db = new (cradle.Connection)(dbHost, 5984, {
+      auth: { username, password }
     }).database(dbname);
     const matches = await Promise.all(
       teamevent.matches
@@ -29,8 +32,8 @@ module.exports = {
   },
 
   getTeamPit: async (dbname, teamNumber) => {
-    const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
-      auth: { username: 'username', password: 'password' }
+    const db = new (cradle.Connection)(dbHost, 5984, {
+      auth: { username, password }
     }).database(dbname);
     var allRevs = [];
     async function getPit(db, rev, team) {
@@ -75,13 +78,12 @@ module.exports = {
         });
       });
     }
-    var revs = "";
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://127.0.0.1:5984/' + dbname + "/pit_" + teamNumber + "?revs_info=true", false, "username", "password");
-    xhr.onload = function () {
-      revs = JSON.parse(xhr.responseText);
-    };
-    xhr.send();
+
+    const revs = await request({
+      url: `${dbHost}:5984/${dbname}/pit_${teamNumber}?revs_info=true`,
+      json: true,
+    });
+
     for (var i = 0, length = revs._revs_info.length; i < length; i++) {
       allRevs.push(await getPit(db, revs._revs_info[i].rev, teamNumber));
     }
@@ -90,9 +92,10 @@ module.exports = {
       attachments: await getPhotos(db, teamNumber)
     }
   },
+
   getTeamAverage: async (dbname, eventKey, teams) => {
-    const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
-      auth: { username: 'username', password: 'password' }
+    const db = new (cradle.Connection)(dbHost, 5984, {
+      auth: { username, password }
     }).database(dbname);
     var allTeamAverages = [];
     for (var a = 0, length = teams.teams.length; a < length; a++) {
@@ -166,9 +169,10 @@ module.exports = {
     }
     return allTeamAverages;
   },
+
   getAllTeamPit: async (dbname, teams) => {
-    const db = new (cradle.Connection)('http://127.0.0.1', 5984, {
-      auth: { username: 'username', password: 'password' }
+    const db = new (cradle.Connection)(dbHost, 5984, {
+      auth: { username, password }
     }).database(dbname);
     var allTeamPit = [];
     async function getPit(team) {
@@ -197,5 +201,11 @@ module.exports = {
       allTeamPit.push(await getPit(team));
     }
     return allTeamPit;
+  },
+
+  db: {
+    host: dbHost,
+    username,
+    password,
   },
 };
