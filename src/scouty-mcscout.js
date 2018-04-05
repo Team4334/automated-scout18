@@ -4,14 +4,10 @@ const request = require('request-promise-native');
 const { TeamEvent } = require('./models');
 
 const dbHost = 'http://35.230.125.220';
-const username = 'team4334';
-const password = 'albertatechalliance';
 
 module.exports = {
   getTeamMatches: async (dbname, teamNumber, teamevent) => {
-    const db = new (cradle.Connection)(dbHost, 5984, {
-      auth: { username, password }
-    }).database(dbname);
+    const db = new (cradle.Connection)(dbHost, 5984).database(dbname);
     const matches = await Promise.all(
       teamevent.matches
         .map(match => match.match(/qm(\d+)/))
@@ -32,9 +28,7 @@ module.exports = {
   },
 
   getTeamPit: async (dbname, teamNumber) => {
-    const db = new (cradle.Connection)(dbHost, 5984, {
-      auth: { username, password }
-    }).database(dbname);
+    const db = new (cradle.Connection)(dbHost, 5984).database(dbname);
     var allRevs = [];
     async function getPit(db, rev, team) {
       return new Promise((resolve, reject) => {
@@ -94,9 +88,7 @@ module.exports = {
   },
 
   getTeamAverage: async (dbname, eventKey, teams) => {
-    const db = new (cradle.Connection)(dbHost, 5984, {
-      auth: { username, password }
-    }).database(dbname);
+    const db = new (cradle.Connection)(dbHost, 5984).database(dbname);
     var allTeamAverages = [];
     for (var a = 0, length = teams.teams.length; a < length; a++) {
       var team = teams.teams[a].substring(3, 7);
@@ -171,9 +163,7 @@ module.exports = {
   },
 
   getAllTeamPit: async (dbname, teams) => {
-    const db = new (cradle.Connection)(dbHost, 5984, {
-      auth: { username, password }
-    }).database(dbname);
+    const db = new (cradle.Connection)(dbHost, 5984).database(dbname);
     var allTeamPit = [];
     async function getPit(team) {
       return new Promise((resolve, reject) => {
@@ -205,7 +195,5 @@ module.exports = {
 
   db: {
     host: dbHost,
-    username,
-    password,
   },
 };

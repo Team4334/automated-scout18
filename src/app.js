@@ -3,6 +3,7 @@ const Router = require('koa-router');
 const pug = require('pug');
 const tba = require('./tba');
 const scouting = require('./scouty-mcscout');
+const request = require('request-promise-native');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 const router = new Router();
@@ -81,23 +82,12 @@ addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
   const dbname = ctx.params.key.substring(4, 8) + ctx.params.key.substring(0, 4);
   let exists = false;
 
-  const xhr = new XMLHttpRequest();
-  xhr.open('HEAD', `${scouting.db.host}/${dbname}`, false, scouting.db.username, scouting.db.password);
-  xhr.onload = function() {
-      if (xhr.status === 200) {
-        exists = true;
-      } else if (xhr.status == 404) {
-        console.log("Database not found. " + dbname)
-        exists = false;
-      } else if (xhr.status == 401) {
-        console.log("Incorrect username or password.");
-        exists = false;
-      } else {
-        console.log("Database responded with:" + xhr.status);
-        exists = false;
-      }
-  };
-  xhr.send();
+  try {
+    const res = await request.head(`${scouting.db.host}:5984/${dbname}`);
+    exists = true;
+  } catch (e) {}
+
+  console.log(exists);
 
   if (exists) {
     return {
@@ -118,25 +108,6 @@ addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
 addView('/event/:key/compare', 'compare', async (ctx) => {
   const teams = await Event.get(ctx.params.key, ctx.query.refresh);
   const dbname = ctx.params.key.substring(4, 8) + ctx.params.key.substring(0, 4);
-  var exists = "";
-
-  var xhr = new XMLHttpRequest();
-  xhr.open('HEAD', 'http://127.0.0.1:5984/' + dbname, false, "username", "password");
-  xhr.onload = function() {
-      if (xhr.status === 200) {
-        exists = true;
-      } else if (xhr.status == 404) {
-        console.log("Database not found. " + dbname)
-        exists = false;
-      } else if (xhr.status == 401) {
-        console.log("Incorrect username or password.");
-        exists = false;
-      } else {
-        console.log("Database responded with:" + xhr.status);
-        exists = false;
-      }
-  };
-  xhr.send();
   return {
     average: await scouting.getTeamAverage(dbname, ctx.params.key, teams),
     pit: await scouting.getAllTeamPit(dbname, teams)
