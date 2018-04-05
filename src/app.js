@@ -4,7 +4,6 @@ const pug = require('pug');
 const tba = require('./tba');
 const scouting = require('./scouty-mcscout');
 const request = require('request-promise-native');
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 const router = new Router();
 
