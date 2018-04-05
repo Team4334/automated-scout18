@@ -9,8 +9,9 @@ block content
     #manual-data(style="display:none")= JSON.stringify(scouting.matches).slice(11,-1)
   if scouting.pit
     each attachment in scouting.pit.attachments.attachments
-      a(href='data:image/jpg;base64,' + attachment, target="_blank")
-        img(src='data:image/jpg;base64,' + attachment, width="20%")
+      if attachment != ''
+        a(href='data:image/jpg;base64,' + attachment, target="_blank")
+          img(src='data:image/jpg;base64,' + attachment, width="20%")
     - delete scouting.pit.attachments
     #pit-data(style="display:none")= JSON.stringify(scouting.pit.data)
 
