@@ -87,11 +87,17 @@ addView('/team/:number/event/:key', 'teamevent', async (ctx) => {
   } catch (e) {}
 
   if (exists) {
+    let pit, matches;
+    try {
+      pit = await scouting.getTeamPit(dbname, ctx.params.number);
+      matches = await scouting.getTeamMatches(dbname, ctx.params.number, teamevent);
+    } catch (err) { }
+
     return {
       teamevent,
       scouting: {
-        pit: await scouting.getTeamPit(dbname, ctx.params.number),
-        matches: await scouting.getTeamMatches(dbname, ctx.params.number, teamevent),
+        pit,
+        matches,
       },
     };
   } else {
