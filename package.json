@@ -14,7 +14,7 @@
     "cradle": "^0.7.1",
     "koa": "^2.4.1",
     "koa-router": "^7.3.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.19",
     "node-cache": "^4.1.1",
     "nodemon": "^1.14.11",
     "numeric": "^1.2.6",
